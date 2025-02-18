@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: db_postgres
+    environment:
+      - POSTGRESQL_USERNAME=postgre
+      - POSTGRESQL_PASSWORD=root
+      - POSTGRESQL_DATABASE=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/bitnami/postgresql
+volumes:
+  postgres_data:
+    driver: local
