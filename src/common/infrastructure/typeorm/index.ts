@@ -1,5 +1,5 @@
-import { DataSource } from 'typeorm'
-import { env } from '../env'
+import { DataSource } from 'typeorm';
+import { env } from '../env';
 
 export const dataSource = new DataSource({
   type: env.DB_TYPE,
@@ -13,4 +13,4 @@ export const dataSource = new DataSource({
   migrations: ['**/migrations/**/*.ts'],
   synchronize: false,
   logging: false,
-})
+});

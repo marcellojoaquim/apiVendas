@@ -1,6 +1,6 @@
-import { AppError } from '@/common/domain/errors/app-error'
-import 'dotenv/config'
-import { z } from 'zod'
+import { AppError } from '@/common/domain/errors/app-error';
+import 'dotenv/config';
+import { z } from 'zod';
 
 const envSchema = z.object({
   NODE_ENV: z
@@ -15,12 +15,12 @@ const envSchema = z.object({
   DB_NAME: z.string().default('postgres'),
   DB_USER: z.string().default('postgres'),
   DB_PASS: z.string().default('postgres'),
-})
+});
 
-const _env = envSchema.safeParse(process.env)
+const _env = envSchema.safeParse(process.env);
 
 if (_env.success === false) {
-  throw new AppError('Invalid enviroment variables')
+  throw new AppError('Invalid enviroment variables');
 }
 
-export const env = _env.data
+export const env = _env.data;

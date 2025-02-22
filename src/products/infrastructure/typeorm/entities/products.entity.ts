@@ -1,29 +1,29 @@
-import { ProductModel } from '@/products/domain/models/products.model'
+import { ProductModel } from '@/products/domain/models/products.model';
 import {
   Column,
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm'
+} from 'typeorm';
 
 @Entity('products')
 export class Product implements ProductModel {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: string;
 
   @Column('varchar')
-  name: string
+  name: string;
 
   @Column('decimal')
-  price: number
+  price: number;
 
   @Column('int')
-  quantity: number
+  quantity: number;
 
   @CreateDateColumn({ name: 'created_at' })
-  created_at: Date
+  created_at: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updated_at: Date
+  updated_at: Date;
 }
