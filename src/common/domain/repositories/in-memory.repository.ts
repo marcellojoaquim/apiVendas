@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { NotFoundError } from '../errors/not-found-error';
 import {
   RepositoryInterface,
@@ -20,22 +21,92 @@ export abstract class InMemoryRepository<Model extends ModelProps>
   items: Model[] = [];
   sortableFields: string[] = ['name', 'created_at', 'updated_at'];
   create(props: CreateProps): Model {
-    throw new Error('Method not implemented.');
+    const model = {
+      id: randomUUID(),
+      created_at: new Date(),
+      updated_at: new Date(),
+      ...props,
+    };
+
+    return model as unknown as Model;
   }
-  insert(model: Model): Promise<Model> {
-    throw new Error('Method not implemented.');
+  async insert(model: Model): Promise<Model> {
+    this.items.push(model);
+    return model;
   }
   async findById(id: string): Promise<Model> {
     return this._get(id);
   }
-  update(model: Model): Promise<Model> {
-    throw new Error('Method not implemented.');
+  async update(model: Model): Promise<Model> {
+    await this._get(model.id);
+    const index = this.items.findIndex(item => item.id === model.id);
+    this.items[index] = model;
+    return model;
   }
-  delete(id: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  async delete(id: string): Promise<void> {
+    await this._get(id);
+    const index = this.items.findIndex(item => item.id === id);
+    this.items.splice(index, 1);
   }
-  search(props: SearchInput): Promise<SearchOutput<Model>> {
-    throw new Error('Method not implemented.');
+  async search(props: SearchInput): Promise<SearchOutput<Model>> {
+    const page = props.page ?? 1;
+    const per_page = props.per_page ?? 15;
+    const sort = props.sort ?? null;
+    const sort_dir = props.sort_dir ?? null;
+    const filter = props.filter ?? null;
+
+    const filteredItems = await this.applyFilter(this.items, filter);
+    const orderedItems = await this.applySort(filteredItems, sort, sort_dir);
+    const paginatedItems = await this.applyPaginate(
+      orderedItems,
+      page,
+      per_page,
+    );
+
+    return {
+      items: paginatedItems,
+      total: filteredItems.length,
+      current_page: page,
+      per_page,
+      sort,
+      sort_dir,
+      filter,
+    };
+  }
+
+  protected abstract applyFilter(
+    items: Model[],
+    filter: string | null,
+  ): Promise<Model[]>;
+
+  protected async applySort(
+    items: Moddel[],
+    sort: string | null,
+    sort_dir: string | null,
+  ): Promise<Model[]> {
+    if (!sort || !this.sortableFields.includes(sort)) {
+      return items;
+    }
+
+    return [...items].sort((a, b) => {
+      if (a[sort] < b[sort]) {
+        return sort_dir === 'asc' ? -1 : 1;
+      }
+      if (a[sort] > b[sort]) {
+        return sort_dir === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+
+  protected async applyPaginate(
+    items: Model[],
+    page: number,
+    per_page: number,
+  ): Promise<Model[]> {
+    const start = (page - 1) * per_page;
+    const limit = start + per_page;
+    return items.slice(start, limit);
   }
 
   protected async _get(id: string): Promise<Model> {

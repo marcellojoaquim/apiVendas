@@ -13,6 +13,7 @@ export type SearchOutput<Model> = {
   current_page: number;
   sort: string | null;
   filter: string | null;
+  sort_dir?: string | null;
 };
 
 export interface RepositoryInterface<Model, CreateProps> {
