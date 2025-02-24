@@ -80,7 +80,7 @@ export abstract class InMemoryRepository<Model extends ModelProps>
   ): Promise<Model[]>;
 
   protected async applySort(
-    items: Moddel[],
+    items: Model[],
     sort: string | null,
     sort_dir: string | null,
   ): Promise<Model[]> {
