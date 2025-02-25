@@ -201,6 +201,7 @@ describe('InMemoryRepository unit test', () => {
         items[3],
         items[4],
       ]);
+      expect(result[4].name).toStrictEqual(items[4].name);
     });
   });
 });
