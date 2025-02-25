@@ -150,4 +150,57 @@ describe('InMemoryRepository unit test', () => {
       expect(result).toHaveLength(0);
     });
   });
+
+  describe('Apply Sort', () => {
+    it('Should no sort items', async () => {
+      const items = [
+        { id: randomUUID(), name: 'TEST', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'test', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'Other', price: 30, created_at, updated_at },
+      ];
+      let result = await sut['applySort'](items, null, null);
+      expect(result).toStrictEqual(items);
+      result = await sut['applySort'](items, 'id', 'asc');
+      expect(result).toStrictEqual(items);
+    });
+  });
+
+  it('Should sort items', async () => {
+    const items = [
+      { id: randomUUID(), name: 'b', price: 20, created_at, updated_at },
+      { id: randomUUID(), name: 'a', price: 20, created_at, updated_at },
+      { id: randomUUID(), name: 'c', price: 30, created_at, updated_at },
+    ];
+    let result = await sut['applySort'](items, 'name', 'desc');
+    expect(result).toStrictEqual([items[2], items[0], items[1]]);
+    result = await sut['applySort'](items, 'name', 'asc');
+    expect(result).toStrictEqual([items[1], items[0], items[2]]);
+  });
+
+  describe('Apply paginate', () => {
+    it('Should paginate items', async () => {
+      const items = [
+        { id: randomUUID(), name: 'a', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'b', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'c', price: 30, created_at, updated_at },
+        { id: randomUUID(), name: 'd', price: 30, created_at, updated_at },
+        { id: randomUUID(), name: 'e', price: 30, created_at, updated_at },
+      ];
+      let result = await sut['applyPaginate'](items, 1, 2);
+      expect(result).toStrictEqual([items[0], items[1]]);
+      expect(result[0].name).toStrictEqual(items[0].name);
+      result = await sut['applyPaginate'](items, 2, 2);
+      expect(result).toStrictEqual([items[2], items[3]]);
+      result = await sut['applyPaginate'](items, 3, 2);
+      expect(result).toStrictEqual([items[4]]);
+      result = await sut['applyPaginate'](items, 1, 5);
+      expect(result).toStrictEqual([
+        items[0],
+        items[1],
+        items[2],
+        items[3],
+        items[4],
+      ]);
+    });
+  });
 });
