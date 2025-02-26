@@ -204,4 +204,144 @@ describe('InMemoryRepository unit test', () => {
       expect(result[4].name).toStrictEqual(items[4].name);
     });
   });
+
+  describe('Search', () => {
+    it('Should search items', async () => {
+      const items = Array(16).fill(model);
+      sut.items = items;
+      const result = await sut.search({});
+      expect(result).toStrictEqual({
+        items: Array(15).fill(model),
+        total: 16,
+        current_page: 1,
+        per_page: 15,
+        sort: null,
+        sort_dir: null,
+        filter: null,
+      });
+    });
+
+    it('Should apply paginate and filter', async () => {
+      const items = [
+        { id: randomUUID(), name: 'test', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'a', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'TEST', price: 30, created_at, updated_at },
+        { id: randomUUID(), name: 'Test', price: 30, created_at, updated_at },
+        { id: randomUUID(), name: 'TesT', price: 30, created_at, updated_at },
+      ];
+      sut.items = items;
+      let result = await sut.search({
+        page: 1,
+        per_page: 2,
+        filter: 'test',
+      });
+      expect(result).toStrictEqual({
+        items: [items[0], items[2]],
+        total: 4,
+        current_page: 1,
+        per_page: 2,
+        sort: null,
+        sort_dir: null,
+        filter: 'test',
+      });
+      result = await sut.search({
+        page: 1,
+        per_page: 2,
+        filter: 'a',
+      });
+      expect(result).toStrictEqual({
+        items: [items[1]],
+        total: 1,
+        current_page: 1,
+        per_page: 2,
+        sort: null,
+        sort_dir: null,
+        filter: 'a',
+      });
+    });
+
+    it('should apply paginate and sort', async () => {
+      const items = [
+        { id: randomUUID(), name: 'b', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'a', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'e', price: 30, created_at, updated_at },
+        { id: randomUUID(), name: 'd', price: 30, created_at, updated_at },
+        { id: randomUUID(), name: 'c', price: 30, created_at, updated_at },
+      ];
+      sut.items = items;
+      let result = await sut.search({
+        page: 1,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'asc',
+      });
+      expect(result).toStrictEqual({
+        items: [items[1], items[0]],
+        total: 5,
+        current_page: 1,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'asc',
+        filter: null,
+      });
+      result = await sut.search({
+        page: 2,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'asc',
+      });
+      expect(result).toStrictEqual({
+        items: [items[4], items[3]],
+        total: 5,
+        current_page: 2,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'asc',
+        filter: null,
+      });
+    });
+
+    it('should search using filter, sort and paginate', async () => {
+      const items = [
+        { id: randomUUID(), name: 'TEST', price: 10, created_at, updated_at },
+        { id: randomUUID(), name: 'a', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'test', price: 30, created_at, updated_at },
+        { id: randomUUID(), name: 'e', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'TeSt', price: 20, created_at, updated_at },
+      ];
+      sut.items = items;
+      let result = await sut.search({
+        page: 1,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'asc',
+        filter: 'TEST',
+      });
+      expect(result).toStrictEqual({
+        items: [items[0], items[4]],
+        total: 3,
+        current_page: 1,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'asc',
+        filter: 'TEST',
+      });
+      result = await sut.search({
+        page: 1,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'desc',
+        filter: 'test',
+      });
+      expect(result).toStrictEqual({
+        items: [items[2], items[4]],
+        total: 3,
+        current_page: 1,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'desc',
+        filter: 'test',
+      });
+    });
+  });
 });
