@@ -1,15 +1,11 @@
 import { InMemoryRepository } from '@/common/domain/repositories/in-memory.repository';
 import { ProductModel } from '@/products/domain/models/products.model';
 import {
-  SearchInput,
-  SearchOutput,
-} from '@/common/domain/repositories/repository.interface';
-import {
-  CreateProductsProps,
   ProductId,
   ProductsRepository,
 } from '@/products/domain/repositories/products.repository';
 import { NotFoundError } from '@/common/domain/errors/not-found-error';
+import { ConflictError } from '@/common/domain/errors/conflict-error';
 
 export class ProductsInMemoryRepository
   extends InMemoryRepository<ProductModel>
@@ -35,32 +31,33 @@ export class ProductsInMemoryRepository
     }
     return existingProduct;
   }
-  conflictName(name: string): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  create(props: CreateProductsProps): ProductModel {
-    throw new Error('Method not implemented.');
-  }
-  insert(model: ProductModel): Promise<ProductModel> {
-    throw new Error('Method not implemented.');
-  }
-  findById(id: string): Promise<ProductModel> {
-    throw new Error('Method not implemented.');
-  }
-  update(model: ProductModel): Promise<ProductModel> {
-    throw new Error('Method not implemented.');
-  }
-  delete(id: string): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  search(props: SearchInput): Promise<SearchOutput<ProductModel>> {
-    throw new Error('Method not implemented.');
+
+  async conflictName(name: string): Promise<void> {
+    const model = this.items.find(item => item.name === name);
+    if (model) {
+      throw new ConflictError(`Product name ${name} already in use`);
+    }
   }
 
-  protected applyFilter(
+  protected async applyFilter(
     items: ProductModel[],
     filter: string | null,
   ): Promise<ProductModel[]> {
-    throw new Error('Method not implemented.');
+    if (!filter) {
+      return items;
+    }
+    return items.filter(item =>
+      item.name.toLowerCase().includes(filter.toLowerCase()),
+    );
+  }
+
+  protected async applySort(
+    items: ProductModel[],
+    sort: string | null,
+    sort_dir: string | null,
+  ): Promise<ProductModel[]> {
+    if (!sort) {
+      return super.applySort(items, sort ?? 'created_at', sort_dir ?? 'desc');
+    }
   }
 }
