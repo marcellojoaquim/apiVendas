@@ -163,18 +163,18 @@ describe('InMemoryRepository unit test', () => {
       result = await sut['applySort'](items, 'id', 'asc');
       expect(result).toStrictEqual(items);
     });
-  });
 
-  it('Should sort items', async () => {
-    const items = [
-      { id: randomUUID(), name: 'b', price: 20, created_at, updated_at },
-      { id: randomUUID(), name: 'a', price: 20, created_at, updated_at },
-      { id: randomUUID(), name: 'c', price: 30, created_at, updated_at },
-    ];
-    let result = await sut['applySort'](items, 'name', 'desc');
-    expect(result).toStrictEqual([items[2], items[0], items[1]]);
-    result = await sut['applySort'](items, 'name', 'asc');
-    expect(result).toStrictEqual([items[1], items[0], items[2]]);
+    it('Should sort items', async () => {
+      const items = [
+        { id: randomUUID(), name: 'b', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'a', price: 20, created_at, updated_at },
+        { id: randomUUID(), name: 'c', price: 30, created_at, updated_at },
+      ];
+      let result = await sut['applySort'](items, 'name', 'desc');
+      expect(result).toStrictEqual([items[2], items[0], items[1]]);
+      result = await sut['applySort'](items, 'name', 'asc');
+      expect(result).toStrictEqual([items[1], items[0], items[2]]);
+    });
   });
 
   describe('Apply paginate', () => {

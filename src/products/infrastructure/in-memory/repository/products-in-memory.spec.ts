@@ -45,4 +45,74 @@ describe('ProductsInMemoryRepository unit test', () => {
       expect.assertions(0);
     });
   });
+
+  describe('Apply filter', () => {
+    it('Should no filter items', async () => {
+      const data = ProductDataBuilder({});
+      sut.items.push(data);
+      const spyFilterMethod = jest.spyOn(sut.items, 'filter' as any);
+      const result = await sut['applyFilter'](sut.items, null);
+      expect(spyFilterMethod).not.toHaveBeenCalled();
+      expect(result).toStrictEqual(sut.items);
+    });
+
+    it('Should filter items using filter params', async () => {
+      const items = [
+        ProductDataBuilder({ name: 'Test' }),
+        ProductDataBuilder({ name: 'TEST' }),
+        ProductDataBuilder({ name: 'TeSt' }),
+        ProductDataBuilder({ name: 'Fake' }),
+      ];
+      sut.items.push(...items);
+      const spyFilterMethod = jest.spyOn(sut.items, 'filter' as any);
+      let result = await sut['applyFilter'](sut.items, 'TEST');
+      expect(spyFilterMethod).toHaveBeenCalledTimes(1);
+      expect(result).toStrictEqual([items[0], items[1], items[2]]);
+
+      result = await sut['applyFilter'](sut.items, 'test');
+      expect(result).toStrictEqual([items[0], items[1], items[2]]);
+
+      result = await sut['applyFilter'](sut.items, 'Fake');
+      expect(result).toStrictEqual([items[3]]);
+
+      result = await sut['applyFilter'](sut.items, 'no-filter');
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('Apply Sort', () => {
+    it('Should sort items by created_at field', async () => {
+      const created_at = new Date();
+      const items = [
+        ProductDataBuilder({ name: 'c', created_at: created_at }),
+        ProductDataBuilder({
+          name: 'a',
+          created_at: new Date(created_at.getTime() + 100),
+        }),
+        ProductDataBuilder({
+          name: 'b',
+          created_at: new Date(created_at.getTime() + 200),
+        }),
+        ProductDataBuilder({
+          name: 'd',
+          created_at: new Date(created_at.getTime() + 300),
+        }),
+      ];
+      sut.items.push(...items);
+      const result = await sut['applySort'](sut.items, null, null);
+      expect(result).toStrictEqual([items[3], items[2], items[1], items[0]]);
+    });
+
+    it('Should sort items by name field', async () => {
+      const items = [
+        ProductDataBuilder({ name: 'a' }),
+        ProductDataBuilder({ name: 'c' }),
+        ProductDataBuilder({ name: 'b' }),
+        ProductDataBuilder({ name: 'd' }),
+      ];
+      sut.items.push(...items);
+      const result = await sut['applySort'](sut.items, 'name', 'desc');
+      expect(result).toStrictEqual([items[3], items[1], items[2], items[0]]);
+    });
+  });
 });
