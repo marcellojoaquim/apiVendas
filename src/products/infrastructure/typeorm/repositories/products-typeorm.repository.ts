@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { Product } from '../entities/products.entity';
 import { dataSource } from '@/common/infrastructure/typeorm';
 import { NotFoundError } from '@/common/domain/errors/not-found-error';
+import { ConflictError } from '@/common/domain/errors/conflict-error';
 
 export class ProductsTypeormRepository implements ProductsRepository {
   sortableFields: string[] = ['name', 'created_at'];
@@ -22,15 +23,23 @@ export class ProductsTypeormRepository implements ProductsRepository {
   }
 
   async findByName(name: string): Promise<ProductModel> {
-    return await this.productsRepository.findOne({ where: { name: name } });
+    const product = await this.productsRepository.findOneBy({ name: name });
+
+    if (!product) {
+      throw new NotFoundError(`Product not found using ${name}`);
+    }
+    return product;
   }
 
   findAllByIds(productIds: ProductId[]): Promise<ProductModel[]> {
     throw new Error('Method not implemented.');
   }
 
-  conflictName(name: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  async conflictName(name: string): Promise<void> {
+    const product = await this.productsRepository.findOneBy({ name: name });
+    if (product) {
+      throw new ConflictError(`The product name: ${name} already in use`);
+    }
   }
 
   create(props: CreateProductsProps): ProductModel {
@@ -45,12 +54,15 @@ export class ProductsTypeormRepository implements ProductsRepository {
     return this._get(id);
   }
 
-  update(model: ProductModel): Promise<ProductModel> {
-    throw new Error('Method not implemented.');
+  async update(model: ProductModel): Promise<ProductModel> {
+    await this._get(model.id);
+    await this.productsRepository.update({ id: model.id }, model);
+    return model;
   }
 
-  delete(id: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  async delete(id: string): Promise<void> {
+    await this._get(id);
+    await this.productsRepository.delete({ id: id });
   }
   search(props: SearchInput): Promise<SearchOutput<ProductModel>> {
     throw new Error('Method not implemented.');
