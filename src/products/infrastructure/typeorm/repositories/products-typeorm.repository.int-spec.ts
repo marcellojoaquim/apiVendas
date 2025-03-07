@@ -128,4 +128,30 @@ describe('ProductsTypeormRepository integration test', () => {
       );
     });
   });
+
+  describe('FindAllByIds', () => {
+    it('Should return a empty list of products', async () => {
+      const ids = [
+        { id: randomUUID() },
+        { id: '60242824-5837-4052-b4b6-b2fa66cac373' },
+      ];
+      const result = await ormRepository.findAllByIds(ids);
+      expect(result).toHaveLength(0);
+      expect(result).toEqual([]);
+    });
+
+    it('Should find a list of products', async () => {
+      const ids = [
+        { id: randomUUID() },
+        { id: '60242824-5837-4052-b4b6-b2fa66cac373' },
+      ];
+      const data = ProductDataBuilder({ id: ids[1].id });
+      const product = testDataSource.manager.create(Product, data);
+      await testDataSource.manager.save(product);
+
+      const result = await ormRepository.findAllByIds(ids);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toEqual(product.id);
+    });
+  });
 });
