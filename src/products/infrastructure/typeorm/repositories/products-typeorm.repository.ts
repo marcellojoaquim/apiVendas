@@ -64,6 +64,7 @@ export class ProductsTypeormRepository implements ProductsRepository {
     await this._get(id);
     await this.productsRepository.delete({ id: id });
   }
+
   search(props: SearchInput): Promise<SearchOutput<ProductModel>> {
     throw new Error('Method not implemented.');
   }
