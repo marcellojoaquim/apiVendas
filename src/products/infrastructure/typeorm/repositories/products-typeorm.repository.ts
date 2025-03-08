@@ -8,7 +8,7 @@ import {
   ProductId,
   ProductsRepository,
 } from '@/products/domain/repositories/products.repository';
-import { In, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { Product } from '../entities/products.entity';
 import { dataSource } from '@/common/infrastructure/typeorm';
 import { NotFoundError } from '@/common/domain/errors/not-found-error';
@@ -69,8 +69,31 @@ export class ProductsTypeormRepository implements ProductsRepository {
     await this.productsRepository.delete({ id: id });
   }
 
-  search(props: SearchInput): Promise<SearchOutput<ProductModel>> {
-    throw new Error('Method not implemented.');
+  async search(props: SearchInput): Promise<SearchOutput<ProductModel>> {
+    const validSort = this.sortableFields.includes(props.sort) || false;
+    const dirOps = ['asc', 'desc'];
+    const validSortDir =
+      (props.sort_dir && dirOps.includes(props.sort_dir.toLowerCase())) ||
+      false;
+    const orderBYField = validSort ? props.sort : 'created_at';
+    const orderByDir = validSortDir ? props.sort_dir : 'desc';
+
+    const [products, total] = await this.productsRepository.findAndCount({
+      ...(props.filter && { where: { name: ILike(props.filter) } }),
+      order: { [orderBYField]: orderByDir },
+      skip: (props.page - 1) * props.per_page,
+      take: props.per_page,
+    });
+
+    return {
+      items: products,
+      per_page: props.per_page,
+      total: total,
+      current_page: props.page,
+      sort: orderBYField,
+      filter: props.filter,
+      sort_dir: orderByDir,
+    };
   }
 
   protected async _get(id: string): Promise<ProductModel> {
