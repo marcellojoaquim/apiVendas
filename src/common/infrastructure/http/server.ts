@@ -1,12 +1,12 @@
 import { env } from '../env';
 import { dataSource } from '../typeorm';
 import { app } from './app';
-import '@/common/infrastructure/container';
+import '../../infrastructure/container';
 
 dataSource
   .initialize()
-  .then(() => {
-    app.listen(env.PORT, () => {
+  .then(async () => {
+    await app.listen(env.PORT, () => {
       console.log(`Server running on port ${env.PORT}`);
       console.log('API-Docs available at GET /docs');
     });
