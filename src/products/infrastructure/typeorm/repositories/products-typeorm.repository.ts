@@ -1,3 +1,4 @@
+import { injectable } from 'tsyringe';
 import {
   SearchInput,
   SearchOutput,
@@ -14,6 +15,7 @@ import { dataSource } from '@/common/infrastructure/typeorm';
 import { NotFoundError } from '@/common/domain/errors/not-found-error';
 import { ConflictError } from '@/common/domain/errors/conflict-error';
 
+@injectable()
 export class ProductsTypeormRepository implements ProductsRepository {
   sortableFields: string[] = ['name', 'created_at'];
   productsRepository: Repository<Product>;
