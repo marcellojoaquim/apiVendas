@@ -6,7 +6,7 @@ import { dataSource } from '@/common/infrastructure/typeorm';
 import { Product } from '../../typeorm/entities/products.entity';
 import { CreateProductUseCase } from '@/products/application/usecases/create-product.usecase';
 
-export async function createProductCOntroller(req: Request, res: Response) {
+export async function createProductController(req: Request, res: Response) {
   const createProductBodySchema = z.object({
     name: z.string(),
     price: z.number(),
