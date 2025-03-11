@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createProductController } from '../controllers/create-product.controller';
+import { getProductController } from '../controllers/get-product.controller';
 
 const productRouter = Router();
 
@@ -75,5 +76,7 @@ const productRouter = Router();
  *         description: Name already used on another product
  */
 productRouter.post('/', createProductController);
+
+productRouter.get('/:id', getProductController);
 
 export { productRouter };
