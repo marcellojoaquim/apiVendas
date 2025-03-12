@@ -4,6 +4,7 @@ import { container } from 'tsyringe';
 import { Product } from '@/products/infrastructure/typeorm/entities/products.entity';
 import { dataSource } from '@/common/infrastructure/typeorm';
 import { GetProductUseCase } from '@/products/application/usecases/get-product.usecase';
+import { UpdateProductUseCase } from '@/products/application/usecases/update-product.usecase';
 
 container.registerSingleton('ProductRepository', ProductsTypeormRepository);
 container.registerSingleton(
@@ -16,3 +17,8 @@ container.registerInstance(
 );
 
 container.registerSingleton('GetProductUseCase', GetProductUseCase.UseCase);
+
+container.registerSingleton(
+  'UpdateProductUseCase',
+  UpdateProductUseCase.UseCase,
+);
