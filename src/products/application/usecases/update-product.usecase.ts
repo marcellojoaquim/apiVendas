@@ -1,6 +1,7 @@
 import { ProductsRepository } from '@/products/domain/repositories/products.repository';
 import { inject, injectable } from 'tsyringe';
 import { ProductOutput } from '../dtos/products-output.dto';
+import { ConflictError } from '@/common/domain/errors/conflict-error';
 
 export namespace UpdateProductUseCase {
   export type Input = {
@@ -21,7 +22,12 @@ export namespace UpdateProductUseCase {
     async execute(input: Input): Promise<Output> {
       const product = await this.productRepositry.findById(input.id);
 
-      if (input.name) product.name = input.name;
+      if (input.name) {
+        if (product.name !== input.name) {
+          await this.productRepositry.conflictName(input.name);
+        }
+        product.name = input.name;
+      }
 
       if (input.quantity) product.quantity = input.quantity;
 
