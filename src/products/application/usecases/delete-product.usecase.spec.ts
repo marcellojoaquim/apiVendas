@@ -1,19 +1,19 @@
 import 'reflect-metadata';
-import { GetProductUseCase } from '@/products/application/usecases/get-product.usecase';
 import { ProductsInMemoryRepository } from '@/products/infrastructure/in-memory/repository/products-in-memory-repository';
 import { NotFoundError } from '@/common/domain/errors/not-found-error';
+import { DeleteProductUseCase } from './delete-product.usecase';
 
-describe('GetProductUseCase unit tests', () => {
-  let sut: GetProductUseCase.UseCase;
+describe('DeleteProductUseCase unit tests', () => {
+  let sut: DeleteProductUseCase.UseCase;
   let repository: ProductsInMemoryRepository;
 
   beforeEach(() => {
     repository = new ProductsInMemoryRepository();
-    sut = new GetProductUseCase.UseCase(repository);
+    sut = new DeleteProductUseCase.UseCase(repository);
   });
 
-  it('Should get a product by id', async () => {
-    const spyFindById = jest.spyOn(repository, 'findById');
+  it('Should delete a product by id', async () => {
+    const spyDelete = jest.spyOn(repository, 'delete');
     const props = {
       name: 'Product 1',
       price: 100,
@@ -21,11 +21,13 @@ describe('GetProductUseCase unit tests', () => {
     };
 
     const model = repository.create(props);
-    await repository.insert(model);
-    const result = await sut.execute({ id: model.id });
+    const product = await repository.insert(model);
 
-    expect(result).toMatchObject(model);
-    expect(spyFindById).toHaveBeenCalledTimes(1);
+    expect(repository.items.length).toBe(1);
+
+    await sut.execute({ id: product.id });
+    expect(spyDelete).toHaveBeenCalledTimes(1);
+    expect(repository.items.length).toBe(0);
   });
 
   it('Should throws error when the product is not found', async () => {
