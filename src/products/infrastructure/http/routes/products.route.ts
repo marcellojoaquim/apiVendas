@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { createProductController } from '../controllers/create-product.controller';
 import { getProductController } from '../controllers/get-product.controller';
 import { updateProductController } from '../controllers/update-product.controller';
+import { deleteProductController } from '../controllers/delete-product.controller';
 
 const productRouter = Router();
 
@@ -137,5 +138,26 @@ productRouter.get('/:id', getProductController);
  *         description: Name already used on another product
  */
 productRouter.put('/:id', updateProductController);
+
+/**
+ * @swagger
+ * /products/{id}:
+ *   delete:
+ *     summary: Delete a product by ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The product ID
+ *     responses:
+ *       204:
+ *         description: The product was successfully deleted
+ *       404:
+ *         description: The product was not found
+ */
+productRouter.delete('/:id', deleteProductController);
 
 export { productRouter };
