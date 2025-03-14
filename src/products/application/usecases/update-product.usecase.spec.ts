@@ -2,6 +2,8 @@ import 'reflect-metadata';
 import { UpdateProductUseCase } from './update-product.usecase';
 import { ProductsInMemoryRepository } from '@/products/infrastructure/in-memory/repository/products-in-memory-repository';
 import { NotFoundError } from '@/common/domain/errors/not-found-error';
+import { ConflictError } from '@/common/domain/errors/conflict-error';
+import { ProductDataBuilder } from '@/products/infrastructure/testing/helpers/products-data-builder';
 
 describe('UpdateProductUseCase unit tests', () => {
   let sut: UpdateProductUseCase.UseCase;
@@ -42,5 +44,30 @@ describe('UpdateProductUseCase unit tests', () => {
     expect(result.quantity).toEqual(newData.quantity);
     expect(result.price).toEqual(newData.price);
     expect(spyUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it('Should not be possible to update a product with a name already in use', async () => {
+    const product1 = repository.create(
+      ProductDataBuilder({ name: 'Product 1' }),
+    );
+    await repository.insert(product1);
+
+    const props = {
+      name: 'Product 2',
+      price: 100,
+      quantity: 10,
+    };
+
+    const model = repository.create(props);
+    await repository.insert(model);
+
+    const newData = {
+      id: model.id,
+      name: 'Product 1',
+      price: 105,
+      quantity: 15,
+    };
+
+    await expect(sut.execute(newData)).rejects.toBeInstanceOf(ConflictError);
   });
 });
