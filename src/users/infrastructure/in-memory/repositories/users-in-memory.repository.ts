@@ -4,7 +4,7 @@ import { InMemoryRepository } from '@/common/domain/repositories/in-memory.repos
 import { UserModel } from '@/users/domain/models/users.model';
 import { UserRepository } from '@/users/domain/repositories/users.repository';
 
-export class UserInMemoryRepository
+export class UsersInMemoryRepository
   extends InMemoryRepository<UserModel>
   implements UserRepository
 {
