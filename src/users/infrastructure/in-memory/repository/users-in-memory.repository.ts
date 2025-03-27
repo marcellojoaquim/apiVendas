@@ -33,10 +33,23 @@ export class UserInMemoryRepository
     }
   }
 
-  protected applyFilter(
+  protected async applyFilter(
     items: UserModel[],
-    filter: string | null,
+    filter: string,
   ): Promise<UserModel[]> {
-    throw new Error('Method not implemented.');
+    if (!filter) {
+      return items;
+    }
+    return items.filter(item => {
+      return item.name.toLowerCase().includes(filter.toLowerCase());
+    });
+  }
+
+  protected async applySort(
+    items: UserModel[],
+    sort: string | null,
+    sort_dir: string | null,
+  ): Promise<UserModel[]> {
+    return super.applySort(items, sort ?? 'created_at', sort_dir ?? 'desc');
   }
 }
