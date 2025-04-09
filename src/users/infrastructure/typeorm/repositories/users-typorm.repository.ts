@@ -28,6 +28,7 @@ export class UsersTypeormRepository implements UserRepository {
     }
     return user;
   }
+
   async findByName(name: string): Promise<UserModel> {
     const user = await this.usersRepository.findOneBy({ name: name });
     if (!user) {
@@ -35,30 +36,37 @@ export class UsersTypeormRepository implements UserRepository {
     }
     return user;
   }
+
   async conflictEmail(email: string): Promise<void> {
     const user = await this.usersRepository.findOneBy({ email: email });
     if (user) {
       throw new ConflictError(`The email ${email} is already in use`);
     }
   }
+
   create(props: CreateUserProps): UserModel {
     return this.usersRepository.create(props);
   }
+
   async insert(model: UserModel): Promise<UserModel> {
     return this.usersRepository.save(model);
   }
+
   findById(id: string): Promise<UserModel> {
     return this._get(id);
   }
+
   async update(model: UserModel): Promise<UserModel> {
     await this._get(model.id);
     await this.usersRepository.update({ id: model.id }, model);
     return model;
   }
+
   async delete(id: string): Promise<void> {
     await this._get(id);
     await this.usersRepository.delete({ id: id });
   }
+
   async search(props: SearchInput): Promise<SearchOutput<UserModel>> {
     const validSort = this.sortableFields.includes(props.sort) || false;
     const dirOps = ['asc', 'desc'];
