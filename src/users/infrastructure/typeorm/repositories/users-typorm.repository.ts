@@ -95,8 +95,8 @@ export class UsersTypeormRepository implements UserRepository {
       total,
       per_page: props.per_page,
       current_page: props.page,
-      sort: props.sort,
-      sort_dir: props.sort_dir,
+      sort: orderByField,
+      sort_dir: orderByDir.toLowerCase() as 'asc' | 'desc',
       filter: props.filter,
     };
   }

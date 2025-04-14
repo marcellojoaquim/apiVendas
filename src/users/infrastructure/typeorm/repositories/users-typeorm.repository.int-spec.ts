@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { NotFoundError } from '@/common/domain/errors/not-found-error';
 import { UserDataBuilder } from '../../testing/helpers/users-data-builder';
 import { ConflictError } from '@/common/domain/errors/conflict-error';
+import { UserModel } from '@/users/domain/models/users.model';
 
 describe('UsersTypeorm Repository integration tests', () => {
   let ormRepository: UsersTypeormRepository;
@@ -147,6 +148,59 @@ describe('UsersTypeorm Repository integration tests', () => {
       await expect(ormRepository.conflictEmail(data.email)).rejects.toThrow(
         new ConflictError(`The email ${data.email} is already in use`),
       );
+    });
+  });
+
+  describe('Search', () => {
+    it('Should apply pagination', async () => {
+      const arrange = Array(16).fill(UserDataBuilder({}));
+      arrange.map(element => delete element.id);
+      const data = testDataSource.manager.create(User, arrange);
+      await testDataSource.manager.save(data);
+      const result = await ormRepository.search({
+        page: 1,
+        per_page: 15,
+        sort: null,
+        sort_dir: null,
+      });
+      expect(result.total).toEqual(16);
+      expect(result.items.length).toEqual(15);
+    });
+
+    it.only('Should order by created_at and sort by DESC when search params are null', async () => {
+      const created_at = new Date();
+      const models: UserModel[] = [];
+      const arrange = Array(16).fill(UserDataBuilder({}));
+      arrange.forEach((element, index) => {
+        delete element.id;
+        models.push({
+          ...element,
+          created_at: new Date(created_at.getTime() + index * 1000),
+          name: `User ${index}`,
+        });
+      });
+      const data = testDataSource.manager.create(User, models);
+      await testDataSource.manager.save(data);
+
+      const result = await ormRepository.search({
+        page: 1,
+        per_page: 15,
+        sort: null,
+        sort_dir: null,
+        filter: null,
+      });
+      console.log(
+        result.items.map(item => ({
+          name: item.name,
+          created_at: item.created_at,
+        })),
+      );
+      expect(result.items.length).toEqual(15);
+      expect(result.items[0].name).toEqual('User 15');
+      expect(result.items[14].name).toEqual('User 1');
+      expect(result.items[13].name).toEqual('User 2');
+      expect(result.sort).toStrictEqual('created_at');
+      expect(result.sort_dir).toStrictEqual('desc');
     });
   });
 });
