@@ -11,6 +11,7 @@ export namespace CreateProductUseCase {
   };
 
   export type Output = ProductOutput;
+
   @injectable()
   export class UseCase {
     constructor(
@@ -19,7 +20,7 @@ export namespace CreateProductUseCase {
 
     async execute(input: Input): Promise<Output> {
       if (!input.name || input.price <= 0 || input.quantity <= 0) {
-        throw new BadRequestError('Input data not provide or valid');
+        throw new BadRequestError('Input data not provide or invalid');
       }
 
       await this.productRepositry.conflictName(input.name);
