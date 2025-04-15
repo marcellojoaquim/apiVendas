@@ -167,7 +167,7 @@ describe('UsersTypeorm Repository integration tests', () => {
       expect(result.items.length).toEqual(15);
     });
 
-    it.only('Should order by created_at and sort by DESC when search params are null', async () => {
+    it('Should order by created_at and sort by DESC when search params are null', async () => {
       const created_at = new Date();
       const models: UserModel[] = [];
       const arrange = Array(16).fill(UserDataBuilder({}));
@@ -189,18 +189,89 @@ describe('UsersTypeorm Repository integration tests', () => {
         sort_dir: null,
         filter: null,
       });
-      console.log(
-        result.items.map(item => ({
-          name: item.name,
-          created_at: item.created_at,
-        })),
-      );
+
       expect(result.items.length).toEqual(15);
       expect(result.items[0].name).toEqual('User 15');
       expect(result.items[14].name).toEqual('User 1');
       expect(result.items[13].name).toEqual('User 2');
       expect(result.sort).toStrictEqual('created_at');
       expect(result.sort_dir).toStrictEqual('desc');
+    });
+
+    it('Should order apply paginate and sort', async () => {
+      const created_at = new Date();
+      const models: UserModel[] = [];
+      'badec'.split('').forEach((element, index) => {
+        models.push({
+          ...UserDataBuilder({}),
+          created_at: new Date(created_at.getTime() + index),
+          name: element,
+        });
+      });
+      const data = testDataSource.manager.create(User, models);
+      await testDataSource.manager.save(data);
+
+      let result = await ormRepository.search({
+        page: 1,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'ASC',
+        filter: null,
+      });
+
+      expect(result.items.length).toEqual(2);
+      expect(result.items[0].name).toEqual('a');
+      expect(result.items[1].name).toEqual('b');
+
+      result = await ormRepository.search({
+        page: 1,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'DESC',
+        filter: null,
+      });
+
+      expect(result.items.length).toEqual(2);
+      expect(result.items[0].name).toEqual('e');
+      expect(result.items[1].name).toEqual('d');
+    });
+
+    it('Should order apply filter, paginate and sort', async () => {
+      const created_at = new Date();
+      const models: UserModel[] = [];
+      const names = ['test', 'a', 'TEST', 'c', 'd', 'TeSt'];
+      names.forEach((element, index) => {
+        models.push({
+          ...UserDataBuilder({}),
+          created_at: new Date(created_at.getTime() + index),
+          name: element,
+        });
+      });
+      const data = testDataSource.manager.create(User, models);
+      await testDataSource.manager.save(data);
+
+      let result = await ormRepository.search({
+        page: 1,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'ASC',
+        filter: 'TEST',
+      });
+
+      expect(result.items.length).toEqual(2);
+      expect(result.items[0].name).toEqual(names[0]);
+      expect(result.items[1].name).toEqual(names[5]);
+
+      result = await ormRepository.search({
+        page: 2,
+        per_page: 2,
+        sort: 'name',
+        sort_dir: 'ASC',
+        filter: 'TEST',
+      });
+
+      expect(result.items.length).toEqual(1);
+      expect(result.items[0].name).toEqual(names[2]);
     });
   });
 });
