@@ -21,6 +21,7 @@ export class UsersTypeormRepository implements UserRepository {
     @inject('UsersDefaultTypeormRepositoy')
     private usersRepository: Repository<User>,
   ) {}
+
   async findByEmail(email: string): Promise<UserModel> {
     const user = await this.usersRepository.findOneBy({ email: email });
     if (!user) {
